@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Ruleta Birra</title>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: #111;
+  color: white;
+  margin-top: 50px;
+}
+
+h1 { margin-bottom: 20px; }
+
+#wheel {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  margin: 20px auto;
+  border: 8px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  background: conic-gradient(#4caf50 0deg 180deg, #ff9800 180deg 360deg);
+  transition: transform 2s ease-out;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 22px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🍺 Ruleta Birra</h1>
+
+<div id="wheel">GIRA</div>
+
+<button onclick="spin()">Girar</button>
+
+<div id="result"></div>
+
+<p id="counter"></p>
+
+<script>
+
+let countAlcohol = 0;
+let countNoAlcohol = 0;
+
+function spin() {
+  const wheel = document.getElementById("wheel");
+  const result = document.getElementById("result");
+
+  let deg = Math.floor(Math.random() * 360) + 720;
+  wheel.style.transform = "rotate(" + deg + "deg)";
+
+  setTimeout(() => {
+    let choice = Math.random() < 0.5 ? "🍺 Con alcohol" : "🟢 Sin alcohol";
+    result.innerHTML = choice;
+
+    if (choice.includes("Con")) {
+      countAlcohol++;
+    } else {
+      countNoAlcohol++;
+    }
+
+    document.getElementById("counter").innerHTML =
+      "Con alcohol: " + countAlcohol + " | Sin alcohol: " + countNoAlcohol;
+
+  }, 2000);
+}
+
+</script>
+
+</body>
+</html>
