@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta Birra 8️⃣🍺</title>
+    <title>Ruleta Birra Pro 🍺</title>
     <style>
-        /* Estilos Modernos Base */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             text-align: center;
             background: radial-gradient(circle, #2c3e50, #000000);
             color: white;
@@ -17,249 +16,202 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        h1 { 
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px 10px rgba(255, 152, 0, 0.5);
-        }
+        h1 { font-size: 2.5rem; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
 
-        /* Contenedor de la Ruleta */
         .wheel-container {
             position: relative;
             margin: 20px auto;
-            width: 320px;
-            height: 320px;
+            width: 350px;
+            height: 350px;
         }
 
-        /* La Flecha indicadora con Animación */
+        /* Aguja mejorada */
         .arrow {
             position: absolute;
-            top: -25px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 0; 
-            height: 0; 
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 35px solid #ffeb3b;
+            width: 0; height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 40px solid #ffffff;
             z-index: 100;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
-            /* Punto de rotación para el efecto 'clic' */
-            transform-origin: top center; 
+            filter: drop-shadow(0 0 5px black);
+            transform-origin: top center;
         }
 
-        /* Clase de animación para la flecha */
-        .arrow.clic {
-            animation: arrow-clic 0.1s ease-out;
-        }
-
+        .arrow.clic { animation: arrow-clic 0.1s ease-out; }
         @keyframes arrow-clic {
             0% { transform: translateX(-50%) rotate(0deg); }
-            50% { transform: translateX(-50%) rotate(15deg); } /* La aguja se empuja */
-            100% { transform: translateX(-50%) rotate(0deg); } /* Vuelve a su sitio */
+            50% { transform: translateX(-50%) rotate(20deg); }
+            100% { transform: translateX(-50%) rotate(0deg); }
         }
 
-        /* Diseño de la Ruleta con 8 Triángulos */
-        #wheel {
+        #wheel-svg {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
-            border: 12px solid #ecf0f1;
-            box-shadow: 0 0 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.5);
-            background: conic-gradient(
-                #2ecc71 0deg 45deg,    /* Verde */
-                #e67e22 45deg 90deg,   /* Naranja */
-                #27ae60 90deg 135deg,  /* Verde Oscuro */
-                #f39c12 135deg 180deg, /* Naranja Claro */
-                #2ecc71 180deg 225deg,
-                #e67e22 225deg 270deg,
-                #27ae60 270deg 315deg,
-                #f39c12 315deg 360deg
-            );
-            /* Transición fluida con bezier para efecto de física */
+            transform: rotate(0deg);
             transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Círculo central para rematar */
-        #wheel::after {
-            content: "🍺";
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: white;
             border-radius: 50%;
-            border: 5px solid #bdc3c7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            color: #333;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
-        /* Botón Moderno */
+        .sector-text {
+            fill: white;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
         button {
             padding: 15px 40px;
             font-size: 1.2rem;
             font-weight: bold;
             color: white;
-            background: #e67e22;
-            border: none;
+            background: #c0392b;
+            border: 4px solid #ffffff;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
+            margin-top: 20px;
+            transition: 0.3s;
         }
 
-        button:hover:not(:disabled) {
-            background: #d35400;
-            transform: scale(1.05);
-            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
-        }
+        button:hover:not(:disabled) { background: #e74c3c; transform: scale(1.05); }
+        button:disabled { background: #7f8c8d; opacity: 0.5; }
 
-        button:active {
-            transform: scale(0.95);
-        }
-        
-        button:disabled {
-            background: #7f8c8d;
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        /* Resultados y Marcador */
         #result {
             margin-top: 20px;
-            height: 35px;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            color: #ffeb3b;
+            height: 40px;
         }
 
         .stats {
-            margin-top: 25px;
+            margin-top: 20px;
             background: rgba(255,255,255,0.1);
-            padding: 10px 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-            font-size: 1rem;
-        }
-
-        .count-item {
-            margin: 5px 10px;
-            display: inline-block;
+            padding: 15px;
+            border-radius: 10px;
         }
     </style>
 </head>
-
 <body>
 
-    <h1>🍺 Ruleta Birra 8</h1>
-    <p style="margin-top: 0; color: #aaa;">50% Probabilidad - Diseño 8 Porciones</p>
+    <h1>🍺 RULETA BIRRA</h1>
 
     <div class="wheel-container">
         <div id="arrow" class="arrow"></div>
-        <div id="wheel"></div>
+        <svg id="wheel-svg" viewBox="0 0 200 200">
+            </svg>
     </div>
 
-    <button id="spinBtn" onclick="spin()">¡Girar ahora!</button>
-
-    <div id="result">¿Qué tocará?</div>
+    <button id="spinBtn" onclick="spin()">¡Girar!</button>
+    <div id="result"></div>
 
     <div class="stats">
-        <div class="count-item">🍺 Con Alcohol: <span id="countAl">0</span></div>
-        <div class="count-item">🟢 Sin Alcohol: <span id="countNo">0</span></div>
+        <span>🔴 CON: <span id="countAl">0</span></span> | 
+        <span>🔵 SIN: <span id="countNo">0</span></span>
     </div>
 
     <script>
-        let countAlcohol = 0;
-        let countNoAlcohol = 0;
+        const sectors = [
+            { label: "CON", color: "#e74c3c" }, { label: "SIN", color: "#3498db" },
+            { label: "CON", color: "#c0392b" }, { label: "SIN", color: "#2980b9" },
+            { label: "CON", color: "#e74c3c" }, { label: "SIN", color: "#3498db" },
+            { label: "CON", color: "#c0392b" }, { label: "SIN", color: "#2980b9" }
+        ];
+
+        const svg = document.getElementById("wheel-svg");
+        const totalSectors = sectors.length;
+        const anglePerSector = 360 / totalSectors;
+
+        // Crear las porciones de la ruleta
+        sectors.forEach((s, i) => {
+            const angle = i * anglePerSector;
+            const x1 = 100 + 100 * Math.cos(Math.PI * (angle - 90) / 180);
+            const y1 = 100 + 100 * Math.sin(Math.PI * (angle - 90) / 180);
+            const x2 = 100 + 100 * Math.cos(Math.PI * (angle + anglePerSector - 90) / 180);
+            const y2 = 100 + 100 * Math.sin(Math.PI * (angle + anglePerSector - 90) / 180);
+
+            const pathData = `M 100 100 L ${x1} ${y1} A 100 100 0 0 1 ${x2} ${y2} Z`;
+            
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("fill", s.color);
+            path.setAttribute("stroke", "white");
+            path.setAttribute("stroke-width", "0.5");
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", "100");
+            text.setAttribute("y", "40");
+            text.setAttribute("class", "sector-text");
+            text.setAttribute("transform", `rotate(${angle + anglePerSector/2}, 100, 100)`);
+            text.setAttribute("text-anchor", "middle");
+            text.textContent = s.label;
+
+            g.appendChild(path);
+            g.appendChild(text);
+            svg.appendChild(g);
+        });
+
         let currentRotation = 0;
         let isSpinning = false;
-        let clickInterval;
+        let countAl = 0; let countNo = 0;
 
         function spin() {
             if (isSpinning) return;
-            
             isSpinning = true;
-            const wheel = document.getElementById("wheel");
-            const result = document.getElementById("result");
+            
             const spinBtn = document.getElementById("spinBtn");
             const arrow = document.getElementById("arrow");
-
-            result.innerHTML = "Girando...";
-            result.style.color = "white";
-            spinBtn.disabled = true;
-
-            // 1. Lógica de rotación (al menos 8 vueltas completas + aleatorio)
-            const extraDeg = Math.floor(Math.random() * 360);
-            const totalRotation = (360 * 8) + extraDeg; 
-            currentRotation += totalRotation;
+            const wheel = document.getElementById("wheel-svg");
             
-            // Aplicar la rotación
+            spinBtn.disabled = true;
+            document.getElementById("result").textContent = "¡Suerte!";
+
+            const extraRotation = Math.floor(Math.random() * 360) + 2880; // 8 vueltas + random
+            currentRotation += extraRotation;
             wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // 2. Lógica de animación de la aguja (clic)
-            // Calculamos cuántas veces debe 'clicar' (cada 45 grados es una porción)
+            // Efecto de sonido visual (clic de la aguja)
             let clicks = 0;
-            const totalClicks = Math.floor(totalRotation / 45);
-            // Duración total de la animación (coincide con el CSS)
-            const duration = 4000; 
-
-            // Limpiar intervalos anteriores por seguridad
-            clearInterval(clickInterval);
-
-            // Creamos un intervalo que simula el frenado. 
-            // Es complejo hacerlo perfecto sin JS avanzado, pero esto simula el efecto:
-            clickInterval = setInterval(() => {
+            const clickInt = setInterval(() => {
+                arrow.classList.remove("clic");
+                void arrow.offsetWidth;
+                arrow.classList.add("clic");
                 clicks++;
-                
-                // Disparar la animación CSS de la aguja
-                arrow.classList.remove('clic');
-                void arrow.offsetWidth; // Truco JS para reiniciar animación CSS
-                arrow.classList.add('clic');
+                if (clicks >= 30) clearInterval(clickInt);
+            }, 100);
 
-                if (clicks >= totalClicks) {
-                    clearInterval(clickInterval);
-                }
-                
-            }, duration / totalClicks); // Distribuir clics en el tiempo
-
-
-            // 3. Lógica del resultado final (50/50)
             setTimeout(() => {
-                // Parar la aguja totalmente
-                clearInterval(clickInterval);
-                arrow.classList.remove('clic');
+                clearInterval(clickInt);
+                // Calcular resultado basado en el ángulo final
+                const actualDeg = currentRotation % 360;
+                // Ajustamos porque la aguja está arriba (270 deg en círculo trigonométrico)
+                const winningIndex = totalSectors - 1 - Math.floor(((actualDeg) % 360) / anglePerSector);
+                const result = sectors[winningIndex < 0 ? 0 : winningIndex].label;
 
-                let choice = Math.random() < 0.5 ? "🍺 ¡CON ALCOHOL!" : "🟢 ¡SIN ALCOHOL!";
-                result.innerHTML = choice;
-                
-                if (choice.includes("CON")) {
-                    result.style.color = "#f39c12"; // Color Naranja
-                    countAlcohol++;
-                    document.getElementById("countAl").innerHTML = countAlcohol;
+                const resDiv = document.getElementById("result");
+                if (result === "CON") {
+                    resDiv.textContent = "🍺 ¡CON ALCOHOL! 🔴";
+                    resDiv.style.color = "#ff4d4d";
+                    countAl++;
+                    document.getElementById("countAl").textContent = countAl;
                 } else {
-                    result.style.color = "#2ecc71"; // Color Verde
-                    countNoAlcohol++;
-                    document.getElementById("countNo").innerHTML = countNoAlcohol;
+                    resDiv.textContent = "🟢 ¡SIN ALCOHOL! 🔵";
+                    resDiv.style.color = "#3498db";
+                    countNo++;
+                    document.getElementById("countNo").textContent = countNo;
                 }
 
                 isSpinning = false;
                 spinBtn.disabled = false;
-            }, duration); // 4 segundos
+            }, 4000);
         }
     </script>
-
 </body>
 </html>
