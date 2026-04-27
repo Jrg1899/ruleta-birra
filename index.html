@@ -1,89 +1,183 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Ruleta Birra</title>
-<style>
-body {
-  font-family: Arial;
-  text-align: center;
-  background: #111;
-  color: white;
-  margin-top: 50px;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta Birra 🍺</title>
+    <style>
+        /* Estilos Modernos */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            background: radial-gradient(circle, #2c3e50, #000000);
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-h1 { margin-bottom: 20px; }
+        h1 { 
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 10px rgba(255, 152, 0, 0.5);
+        }
 
-#wheel {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  margin: 20px auto;
-  border: 8px solid #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  background: conic-gradient(#4caf50 0deg 180deg, #ff9800 180deg 360deg);
-  transition: transform 2s ease-out;
-}
+        /* Contenedor de la Ruleta */
+        .wheel-container {
+            position: relative;
+            margin: 30px auto;
+        }
 
-button {
-  padding: 10px 20px;
-  font-size: 18px;
-  margin-top: 20px;
-  cursor: pointer;
-}
+        /* La Flecha indicadora */
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #ffeb3b;
+            z-index: 10;
+        }
 
-#result {
-  margin-top: 20px;
-  font-size: 22px;
-}
+        #wheel {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 10px solid #ecf0f1;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            background: conic-gradient(
+                #f39c12 0deg 90deg, 
+                #2ecc71 90deg 180deg, 
+                #e67e22 180deg 270deg, 
+                #27ae60 270deg 360deg
+            );
+            transition: transform 3s cubic-bezier(0.15, 0, 0.15, 1);
+            position: relative;
+            overflow: hidden;
+        }
 
-</style>
+        /* Botón Moderno */
+        button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background: #e67e22;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #d35400;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Resultados y Marcador */
+        #result {
+            margin-top: 30px;
+            height: 40px;
+            font-size: 26px;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+
+        .stats {
+            margin-top: 40px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .count-item {
+            margin: 5px 15px;
+            display: inline-block;
+            font-size: 1.1rem;
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>🍺 Ruleta Birra</h1>
+    <h1>🍺 Ruleta Birra</h1>
 
-<div id="wheel">GIRA</div>
+    <div class="wheel-container">
+        <div class="arrow"></div>
+        <div id="wheel">¿QUÉ TOCA?</div>
+    </div>
 
-<button onclick="spin()">Girar</button>
+    <button id="spinBtn" onclick="spin()">¡Girar ahora!</button>
 
-<div id="result"></div>
+    <div id="result"></div>
 
-<p id="counter"></p>
+    <div class="stats">
+        <div class="count-item">🍺 Con Alcohol: <span id="countAl">0</span></div>
+        <div class="count-item">🟢 Sin Alcohol: <span id="countNo">0</span></div>
+    </div>
 
-<script>
+    <script>
+        let countAlcohol = 0;
+        let countNoAlcohol = 0;
+        let currentRotation = 0;
+        let isSpinning = false;
 
-let countAlcohol = 0;
-let countNoAlcohol = 0;
+        function spin() {
+            if (isSpinning) return; // Evita múltiples clics
+            
+            isSpinning = true;
+            const wheel = document.getElementById("wheel");
+            const result = document.getElementById("result");
+            const spinBtn = document.getElementById("spinBtn");
 
-function spin() {
-  const wheel = document.getElementById("wheel");
-  const result = document.getElementById("result");
+            // Limpiar resultado anterior
+            result.innerHTML = "Girando...";
+            spinBtn.disabled = true;
 
-  let deg = Math.floor(Math.random() * 360) + 720;
-  wheel.style.transform = "rotate(" + deg + "deg)";
+            // Generar una rotación aleatoria (mínimo 5 vueltas completas)
+            const extraDeg = Math.floor(Math.random() * 360);
+            currentRotation += (360 * 5) + extraDeg; 
+            
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-  setTimeout(() => {
-    let choice = Math.random() < 0.5 ? "🍺 Con alcohol" : "🟢 Sin alcohol";
-    result.innerHTML = choice;
+            setTimeout(() => {
+                // Lógica del resultado (50/50)
+                let choice = Math.random() < 0.5 ? "🍺 ¡TOCA CON ALCOHOL!" : "🟢 ¡TOCA SIN ALCOHOL!";
+                result.innerHTML = choice;
 
-    if (choice.includes("Con")) {
-      countAlcohol++;
-    } else {
-      countNoAlcohol++;
-    }
+                if (choice.includes("CON")) {
+                    countAlcohol++;
+                    document.getElementById("countAl").innerHTML = countAlcohol;
+                } else {
+                    countNoAlcohol++;
+                    document.getElementById("countNo").innerHTML = countNoAlcohol;
+                }
 
-    document.getElementById("counter").innerHTML =
-      "Con alcohol: " + countAlcohol + " | Sin alcohol: " + countNoAlcohol;
-
-  }, 2000);
-}
-
-</script>
+                isSpinning = false;
+                spinBtn.disabled = false;
+            }, 3000); // 3 segundos dura la animación
+        }
+    </script>
 
 </body>
 </html>
