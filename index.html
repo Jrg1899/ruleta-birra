@@ -2,286 +2,192 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ruleta Birra PRO 🍺</title>
+<title>Ruleta Beer PRO Canvas 🍺</title>
 
 <style>
 body {
-    font-family: 'Arial Black', sans-serif;
-    text-align: center;
+    margin: 0;
     background: #0a0a0a;
     color: white;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
+    font-family: Arial Black;
+    text-align: center;
 }
 
-.wheel-container {
-    position: relative;
-    width: 360px;
-    height: 360px;
-    margin: 20px;
-    border: 10px solid #222;
-    border-radius: 50%;
-    box-shadow: 0 0 40px rgba(241, 196, 15, 0.2);
-    background: #111;
-}
-
-.arrow {
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 18px solid transparent;
-    border-right: 18px solid transparent;
-    border-top: 45px solid #fff;
-    z-index: 100;
-}
-
-#wheel-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(0deg);
-    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-    filter: url(#beer-filter);
-}
-
-/* EFECTO LÍQUIDO REAL */
-.is-spinning #wheel-svg {
-    animation: liquid-spin 0.25s infinite ease-in-out;
-}
-
-@keyframes liquid-spin {
-    0%   { transform: rotate(var(--rot)) scale(1) skewX(0deg); }
-    25%  { transform: rotate(var(--rot)) scale(1.02) skewX(1deg); }
-    50%  { transform: rotate(var(--rot)) scale(1.03) skewX(-1deg); }
-    75%  { transform: rotate(var(--rot)) scale(1.02) skewX(0.5deg); }
-    100% { transform: rotate(var(--rot)) scale(1) skewX(0deg); }
-}
-
-/* BURBUJAS */
-.bubble {
-    fill: rgba(255,255,255,0.6);
-    animation: rise 2s infinite ease-in;
-}
-
-@keyframes rise {
-    0% { transform: translateY(0); opacity: 0; }
-    50% { opacity: 0.9; }
-    100% { transform: translateY(-40px); opacity: 0; }
-}
-
-/* BURBUJAS CAÓTICAS AL GIRAR */
-.is-spinning .bubble {
-    animation: bubble-chaos 0.4s infinite;
-}
-
-@keyframes bubble-chaos {
-    0%   { transform: translate(0,0) scale(1); }
-    25%  { transform: translate(3px,-10px) scale(1.2); }
-    50%  { transform: translate(-3px,-20px) scale(1.4); }
-    75%  { transform: translate(2px,-10px) scale(1.2); }
-    100% { transform: translate(0,0) scale(1); }
-}
-
-.sector-text {
-    fill: white;
-    font-weight: 900;
-    font-size: 15px;
-    text-shadow: 2px 2px 4px black;
+canvas {
+    display: block;
+    margin: auto;
 }
 
 button {
-    padding: 18px 50px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(#f1c40f, #d35400);
-    border: none;
+    padding: 15px 40px;
+    font-size: 20px;
+    margin-top: 20px;
     border-radius: 50px;
+    border: none;
+    background: orange;
+    color: white;
     cursor: pointer;
-    box-shadow: 0 6px #963d00;
-}
-
-button:active { transform: translateY(4px); }
-
-#result {
-    margin: 20px;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.stats {
-    background: rgba(255,255,255,0.05);
-    padding: 15px 30px;
-    border-radius: 30px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🍺 RULETA BEER PRO</h1>
+<h1>🍺 RULETA BEER PRO (CANVAS)</h1>
 
-<div class="wheel-container" id="container">
-    <div class="arrow"></div>
+<canvas id="c" width="400" height="400"></canvas>
 
-    <svg id="wheel-svg" viewBox="0 0 200 200">
-
-        <defs>
-
-            <!-- FILTRO MEJORADO -->
-            <filter id="beer-filter">
-                <feTurbulence 
-                    type="fractalNoise" 
-                    baseFrequency="0.02 0.08" 
-                    numOctaves="3" 
-                    seed="2"
-                    result="noise">
-                    <animate attributeName="baseFrequency"
-                        values="0.02 0.08;0.04 0.12;0.02 0.08"
-                        dur="0.6s"
-                        repeatCount="indefinite"/>
-                </feTurbulence>
-
-                <feDisplacementMap 
-                    in="SourceGraphic" 
-                    in2="noise" 
-                    scale="12"
-                    xChannelSelector="R"
-                    yChannelSelector="G"/>
-            </filter>
-
-            <!-- COLORES -->
-            <linearGradient id="grad-con" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fff"/>
-                <stop offset="15%" stop-color="#f1c40f"/>
-                <stop offset="100%" stop-color="#e67e22"/>
-            </linearGradient>
-
-            <linearGradient id="grad-sin" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#fff"/>
-                <stop offset="15%" stop-color="#3498db"/>
-                <stop offset="100%" stop-color="#2980b9"/>
-            </linearGradient>
-
-        </defs>
-
-        <g id="wheel-group"></g>
-
-        <!-- ESPUMA -->
-        <ellipse cx="100" cy="40" rx="80" ry="20" fill="white" opacity="0.15"/>
-
-    </svg>
-</div>
-
-<button id="spinBtn" onclick="spin()">¡GIRAR! 🍻</button>
+<button onclick="spin()">GIRAR 🍻</button>
 
 <div id="result"></div>
 
-<div class="stats">
-🔴 CON: <span id="countAl">0</span> |
-🔵 SIN: <span id="countNo">0</span>
-</div>
-
 <script>
-const sectors = [
-    { label: "CON", type: "con" },
-    { label: "SIN", type: "sin" },
-    { label: "CON", type: "con" },
-    { label: "SIN", type: "sin" },
-    { label: "CON", type: "con" },
-    { label: "SIN", type: "sin" },
-    { label: "CON", type: "con" },
-    { label: "SIN", type: "sin" }
-];
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
 
-const group = document.getElementById("wheel-group");
-const anglePer = 360 / sectors.length;
-
-sectors.forEach((s, i) => {
-    const angle = i * anglePer;
-
-    const x1 = 100 + 100 * Math.cos((angle - 90) * Math.PI/180);
-    const y1 = 100 + 100 * Math.sin((angle - 90) * Math.PI/180);
-    const x2 = 100 + 100 * Math.cos((angle + anglePer - 90) * Math.PI/180);
-    const y2 = 100 + 100 * Math.sin((angle + anglePer - 90) * Math.PI/180);
-
-    const g = document.createElementNS("http://www.w3.org/2000/svg","g");
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-    path.setAttribute("d", `M100 100 L${x1} ${y1} A100 100 0 0 1 ${x2} ${y2} Z`);
-    path.setAttribute("fill", s.type === "con" ? "url(#grad-con)" : "url(#grad-sin)");
-
-    g.appendChild(path);
-
-    // BURBUJAS
-    for(let j=0;j<4;j++){
-        const b = document.createElementNS("http://www.w3.org/2000/svg","circle");
-        b.setAttribute("cx", 100 + Math.random()*80 - 40);
-        b.setAttribute("cy", 100 + Math.random()*80 - 40);
-        b.setAttribute("r", Math.random()*2 + 0.5);
-        b.setAttribute("class","bubble");
-        g.appendChild(b);
-    }
-
-    const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-    text.setAttribute("transform", `rotate(${angle+anglePer/2},100,100)`);
-    text.setAttribute("x","100");
-    text.setAttribute("y","45");
-    text.setAttribute("text-anchor","middle");
-    text.setAttribute("class","sector-text");
-    text.textContent = s.label;
-
-    g.appendChild(text);
-    group.appendChild(g);
-});
+let W = canvas.width;
+let H = canvas.height;
+let cx = W/2;
+let cy = H/2;
+let radius = 150;
 
 let rotation = 0;
-let cAl=0, cNo=0;
+let velocity = 0;
 
-function spin(){
-    const btn = document.getElementById("spinBtn");
-    const wheel = document.getElementById("wheel-svg");
-    const container = document.getElementById("container");
+// =========================
+// PARTÍCULAS (BURBUJAS)
+// =========================
+let bubbles = [];
 
-    btn.disabled = true;
-    container.classList.add("is-spinning");
+for(let i=0;i<40;i++){
+    bubbles.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        r: Math.random()*3+1,
+        vy: Math.random()*-1-0.5
+    });
+}
 
-    const extra = Math.floor(Math.random()*360)+2160;
-    rotation += extra;
+// =========================
+// ONDA DEL LÍQUIDO
+// =========================
+let wave = [];
 
-    wheel.style.setProperty('--rot', rotation+"deg");
-    wheel.style.transform = `rotate(${rotation}deg)`;
+for(let i=0;i<50;i++){
+    wave.push({
+        x: i*(W/50),
+        y: 0,
+        vy: 0
+    });
+}
 
-    setTimeout(()=>{
-        container.classList.remove("is-spinning");
+// =========================
+// LOOP PRINCIPAL
+// =========================
+function loop(){
+    requestAnimationFrame(loop);
 
-        const deg = rotation % 360;
-        const idx = sectors.length - 1 - Math.floor(deg / anglePer);
-        const res = sectors[idx].label;
+    ctx.clearRect(0,0,W,H);
 
-        const rDiv = document.getElementById("result");
+    // FONDO RUEDA
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(rotation);
 
-        if(res==="CON"){
-            rDiv.textContent="🍻 CON ALCOHOL";
-            rDiv.style.color="#f1c40f";
-            cAl++;
-            document.getElementById("countAl").textContent=cAl;
-        }else{
-            rDiv.textContent="💧 SIN ALCOHOL";
-            rDiv.style.color="#3498db";
-            cNo++;
-            document.getElementById("countNo").textContent=cNo;
+    for(let i=0;i<8;i++){
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.arc(0,0,radius,i*Math.PI/4,(i+1)*Math.PI/4);
+        ctx.fillStyle = i%2==0 ? "#f1c40f" : "#3498db";
+        ctx.fill();
+    }
+
+    ctx.restore();
+
+    // =====================
+    // LÍQUIDO (WAVE)
+    // =====================
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx,cy,radius,0,Math.PI*2);
+    ctx.clip();
+
+    let tilt = velocity * 50;
+
+    ctx.beginPath();
+    ctx.moveTo(0,cy);
+
+    for(let i=0;i<wave.length;i++){
+        let w = wave[i];
+
+        // física simple onda
+        w.vy += (-w.y * 0.02);
+        w.vy += Math.sin(i + performance.now()/200)*0.05;
+        w.vy += tilt * (i/wave.length - 0.5)*0.01;
+        w.vy *= 0.95;
+        w.y += w.vy;
+
+        ctx.lineTo(w.x, cy + w.y);
+    }
+
+    ctx.lineTo(W,H);
+    ctx.lineTo(0,H);
+    ctx.closePath();
+
+    let grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,"#fff8");
+    grad.addColorStop(0.2,"#f1c40f");
+    grad.addColorStop(1,"#e67e22");
+
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // =====================
+    // BURBUJAS
+    // =====================
+    for(let b of bubbles){
+        b.y += b.vy - velocity*2;
+        if(b.y < cy - radius){
+            b.y = cy + radius;
+            b.x = Math.random()*W;
         }
 
-        btn.disabled=false;
+        ctx.beginPath();
+        ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+        ctx.fillStyle = "rgba(255,255,255,0.6)";
+        ctx.fill();
+    }
 
-    },4000);
+    ctx.restore();
+
+    // =====================
+    // ROTACIÓN
+    // =====================
+    rotation += velocity;
+    velocity *= 0.98;
+
 }
+loop();
+
+// =========================
+// SPIN
+// =========================
+function spin(){
+    velocity += 0.2 + Math.random()*0.2;
+
+    setTimeout(()=>{
+        let res = Math.random() > 0.5 ? "CON 🍻" : "SIN 💧";
+        document.getElementById("result").textContent = res;
+    },2000);
+}
+
+// =========================
+// MÓVIL (INCLINACIÓN REAL)
+// =========================
+window.addEventListener("deviceorientation", e=>{
+    let tilt = e.gamma / 30;
+    velocity += tilt * 0.01;
+});
 </script>
 
 </body>
