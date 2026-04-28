@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta Birra Pro 🍺</title>
+    <title>Ruleta Birra Líquida 🍺</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
             text-align: center;
-            background: radial-gradient(circle, #2c3e50, #000000);
+            background: radial-gradient(circle, #1a1a1a, #000000);
             color: white;
             margin: 0;
             display: flex;
@@ -16,84 +16,93 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
         }
 
-        h1 { font-size: 2.5rem; margin-bottom: 5px; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+        h1 { font-size: 2.5rem; margin-bottom: 5px; color: #f39c12; text-shadow: 0 0 15px rgba(243, 156, 18, 0.5); }
 
         .wheel-container {
             position: relative;
             margin: 20px auto;
-            width: 350px;
-            height: 350px;
+            width: 380px;
+            height: 380px;
+            padding: 10px;
+            background: #333;
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5), inset 0 0 20px #000;
         }
 
-        /* Aguja mejorada */
         .arrow {
             position: absolute;
-            top: -15px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; height: 0; 
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 40px solid #ffffff;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 45px solid #ffffff;
             z-index: 100;
-            filter: drop-shadow(0 0 5px black);
-            transform-origin: top center;
-        }
-
-        .arrow.clic { animation: arrow-clic 0.1s ease-out; }
-        @keyframes arrow-clic {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            50% { transform: translateX(-50%) rotate(20deg); }
-            100% { transform: translateX(-50%) rotate(0deg); }
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.5));
         }
 
         #wheel-svg {
             width: 100%;
             height: 100%;
             transform: rotate(0deg);
-            transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
             border-radius: 50%;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        /* Efecto de oleaje cuando gira */
+        .is-spinning #wheel-svg {
+            animation: liquid-wiggle 1s infinite ease-in-out;
+        }
+
+        @keyframes liquid-wiggle {
+            0%, 100% { filter: url(#liquid-filter) brightness(1.1); }
+            50% { filter: url(#liquid-filter) brightness(0.9) saturate(1.2); }
         }
 
         .sector-text {
-            fill: white;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
+            fill: #fff;
+            font-weight: 900;
+            font-size: 16px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
             pointer-events: none;
         }
 
         button {
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            padding: 15px 50px;
+            font-size: 1.4rem;
             font-weight: bold;
-            color: white;
-            background: #c0392b;
-            border: 4px solid #ffffff;
+            color: #fff;
+            background: linear-gradient(#e67e22, #d35400);
+            border: none;
+            border-bottom: 4px solid #a04000;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 20px;
-            transition: 0.3s;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: 0.2s;
         }
 
-        button:hover:not(:disabled) { background: #e74c3c; transform: scale(1.05); }
-        button:disabled { background: #7f8c8d; opacity: 0.5; }
+        button:active { transform: translateY(3px); border-bottom: 0; }
+        button:disabled { background: #555; border-color: #333; cursor: not-allowed; }
 
         #result {
             margin-top: 20px;
             font-size: 28px;
             font-weight: bold;
-            height: 40px;
+            min-height: 40px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
 
         .stats {
             margin-top: 20px;
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -101,13 +110,26 @@
 
     <h1>🍺 RULETA BIRRA</h1>
 
-    <div class="wheel-container">
-        <div id="arrow" class="arrow"></div>
+    <div class="wheel-container" id="container">
+        <div class="arrow"></div>
         <svg id="wheel-svg" viewBox="0 0 200 200">
-            </svg>
+            <defs>
+                <filter id="liquid-filter">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+                </filter>
+                
+                <linearGradient id="beer-grad-con" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /> <stop offset="15%" style="stop-color:#f1c40f;stop-opacity:1" /> <stop offset="100%" style="stop-color:#d35400;stop-opacity:1" /> </linearGradient>
+
+                <linearGradient id="beer-grad-sin" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" /> <stop offset="15%" style="stop-color:#3498db;stop-opacity:1" /> <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
     </div>
 
-    <button id="spinBtn" onclick="spin()">¡Girar!</button>
+    <button id="spinBtn" onclick="spin()">¡Girar Caña! 🍻</button>
     <div id="result"></div>
 
     <div class="stats">
@@ -117,17 +139,16 @@
 
     <script>
         const sectors = [
-            { label: "CON", color: "#e74c3c" }, { label: "SIN", color: "#3498db" },
-            { label: "CON", color: "#c0392b" }, { label: "SIN", color: "#2980b9" },
-            { label: "CON", color: "#e74c3c" }, { label: "SIN", color: "#3498db" },
-            { label: "CON", color: "#c0392b" }, { label: "SIN", color: "#2980b9" }
+            { label: "CON", grad: "url(#beer-grad-con)" }, { label: "SIN", grad: "url(#beer-grad-sin)" },
+            { label: "CON", grad: "url(#beer-grad-con)" }, { label: "SIN", grad: "url(#beer-grad-sin)" },
+            { label: "CON", grad: "url(#beer-grad-con)" }, { label: "SIN", grad: "url(#beer-grad-sin)" },
+            { label: "CON", grad: "url(#beer-grad-con)" }, { label: "SIN", grad: "url(#beer-grad-sin)" }
         ];
 
         const svg = document.getElementById("wheel-svg");
         const totalSectors = sectors.length;
         const anglePerSector = 360 / totalSectors;
 
-        // Crear las porciones de la ruleta
         sectors.forEach((s, i) => {
             const angle = i * anglePerSector;
             const x1 = 100 + 100 * Math.cos(Math.PI * (angle - 90) / 180);
@@ -136,18 +157,17 @@
             const y2 = 100 + 100 * Math.sin(Math.PI * (angle + anglePerSector - 90) / 180);
 
             const pathData = `M 100 100 L ${x1} ${y1} A 100 100 0 0 1 ${x2} ${y2} Z`;
-            
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
             
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", pathData);
-            path.setAttribute("fill", s.color);
-            path.setAttribute("stroke", "white");
-            path.setAttribute("stroke-width", "0.5");
+            path.setAttribute("fill", s.grad);
+            path.setAttribute("stroke", "rgba(255,255,255,0.3)");
+            path.setAttribute("stroke-width", "1");
 
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("x", "100");
-            text.setAttribute("y", "40");
+            text.setAttribute("y", "45");
             text.setAttribute("class", "sector-text");
             text.setAttribute("transform", `rotate(${angle + anglePerSector/2}, 100, 100)`);
             text.setAttribute("text-anchor", "middle");
@@ -167,42 +187,31 @@
             isSpinning = true;
             
             const spinBtn = document.getElementById("spinBtn");
-            const arrow = document.getElementById("arrow");
+            const container = document.getElementById("container");
             const wheel = document.getElementById("wheel-svg");
             
+            container.classList.add("is-spinning");
             spinBtn.disabled = true;
-            document.getElementById("result").textContent = "¡Suerte!";
+            document.getElementById("result").textContent = "Sirviendo...";
 
-            const extraRotation = Math.floor(Math.random() * 360) + 2880; // 8 vueltas + random
+            const extraRotation = Math.floor(Math.random() * 360) + 1440; 
             currentRotation += extraRotation;
             wheel.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Efecto de sonido visual (clic de la aguja)
-            let clicks = 0;
-            const clickInt = setInterval(() => {
-                arrow.classList.remove("clic");
-                void arrow.offsetWidth;
-                arrow.classList.add("clic");
-                clicks++;
-                if (clicks >= 30) clearInterval(clickInt);
-            }, 100);
-
             setTimeout(() => {
-                clearInterval(clickInt);
-                // Calcular resultado basado en el ángulo final
+                container.classList.remove("is-spinning");
                 const actualDeg = currentRotation % 360;
-                // Ajustamos porque la aguja está arriba (270 deg en círculo trigonométrico)
-                const winningIndex = totalSectors - 1 - Math.floor(((actualDeg) % 360) / anglePerSector);
+                const winningIndex = totalSectors - 1 - Math.floor((actualDeg % 360) / anglePerSector);
                 const result = sectors[winningIndex < 0 ? 0 : winningIndex].label;
 
                 const resDiv = document.getElementById("result");
                 if (result === "CON") {
-                    resDiv.textContent = "🍺 ¡CON ALCOHOL! 🔴";
-                    resDiv.style.color = "#ff4d4d";
+                    resDiv.textContent = "🍻 ¡CON ALCOHOL! 🔴";
+                    resDiv.style.color = "#f1c40f";
                     countAl++;
                     document.getElementById("countAl").textContent = countAl;
                 } else {
-                    resDiv.textContent = "🟢 ¡SIN ALCOHOL! 🔵";
+                    resDiv.textContent = "💧 ¡SIN ALCOHOL! 🔵";
                     resDiv.style.color = "#3498db";
                     countNo++;
                     document.getElementById("countNo").textContent = countNo;
