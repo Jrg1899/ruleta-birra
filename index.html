@@ -15,7 +15,9 @@
         align-items: center;
         justify-content: center;
         min-height: 100vh;
+        overflow: hidden;
     }
+    .container { position: relative; }
     canvas {
         display: block;
         margin: auto;
@@ -34,7 +36,15 @@
         transition: 0.1s;
     }
     button:active { transform: translateY(4px); box-shadow: 0 1px #963d00; }
-    #result { font-size: 32px; margin: 15px; height: 40px; color: #f1c40f; }
+    button:disabled { background: #444; box-shadow: none; opacity: 0.7; }
+    
+    #result { 
+        font-size: 32px; 
+        margin: 15px; 
+        height: 45px; 
+        color: #f1c40f; 
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
     .stats {
         background: rgba(255,255,255,0.05);
         padding: 10px 30px;
@@ -68,13 +78,14 @@ let W = canvas.width, H = canvas.height;
 let cx = W/2, cy = H/2, radius = 180;
 let rotation = 0, velocity = 0, isSpinning = false, tickerAngle = 0;
 let countAl = 0, countNo = 0;
+let victoryParticles = []; // Partículas de explosión final
 const sectors = ["CON", "SIN", "CON", "SIN", "CON", "SIN", "CON", "SIN"];
 
 // Física de la onda
 let wave = [];
 for(let i=0; i<60; i++) wave.push({y:0, vy:0});
 
-// Burbujas
+// Burbujas ambientales
 let bubbles = [];
 for(let i=0; i<60; i++){
     bubbles.push({
@@ -89,7 +100,7 @@ function loop(){
     requestAnimationFrame(loop);
     ctx.clearRect(0,0,W,H);
 
-    // 1. DIBUJAR RUEDA
+    // 1. DIBUJAR RUEDA DE FONDO
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(rotation);
@@ -102,6 +113,7 @@ function loop(){
         ctx.fill();
         ctx.strokeStyle = "rgba(0,0,0,0.1)";
         ctx.stroke();
+
         ctx.save();
         ctx.rotate(angle + Math.PI/8);
         ctx.textAlign = "right";
@@ -112,27 +124,27 @@ function loop(){
     }
     ctx.restore();
 
-    // 2. MÁSCARA
+    // 2. MÁSCARA CIRCULAR (Para el líquido)
     ctx.save();
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI*2);
     ctx.clip();
 
-    // 3. FÍSICA ONDA
+    // 3. FÍSICA Y DIBUJO DEL LÍQUIDO + ESPUMA
     let tilt = velocity * 70;
     
-    // --- CAPA DE LÍQUIDO (CERVEZA) ---
+    // --- Capa Cerveza ---
     ctx.beginPath();
     ctx.moveTo(cx - radius, cy);
     for(let i=0; i<wave.length; i++){
         let w = wave[i];
         w.vy += (-w.y * 0.04);
-        w.vy += Math.sin(i/5 + performance.now()/150) * (0.2 + velocity*3);
+        w.vy += Math.sin(i/5 + performance.now()/150) * (0.2 + velocity*4);
         w.vy += tilt * (i/wave.length - 0.5) * 0.6;
         w.vy *= 0.92;
         w.y += w.vy;
         let x = (cx - radius) + ((radius*2) * (i/wave.length));
-        let y = cy + 20 + w.y - (velocity * 40);
+        let y = cy + 25 + w.y - (velocity * 45);
         ctx.lineTo(x, y);
     }
     ctx.lineTo(cx + radius, H);
@@ -144,25 +156,24 @@ function loop(){
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // --- EFECTO ESPUMA (Capa Blanca Superior) ---
+    // --- Capa Espuma Blanca Superior ---
     ctx.beginPath();
     ctx.moveTo(cx - radius, cy);
     for(let i=0; i<wave.length; i++){
         let x = (cx - radius) + ((radius*2) * (i/wave.length));
-        let y = cy + 20 + wave[i].y - (velocity * 40);
+        let y = cy + 25 + wave[i].y - (velocity * 45);
         ctx.lineTo(x, y);
     }
-    // Grosor de la espuma
     for(let i=wave.length-1; i>=0; i--){
         let x = (cx - radius) + ((radius*2) * (i/wave.length));
-        let y = cy + 20 + wave[i].y - (velocity * 40) + 15; // +15px de espesor
+        let y = cy + 25 + wave[i].y - (velocity * 45) + 18; // Grosor de espuma
         ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
     ctx.fill();
 
-    // --- BURBUJAS ---
+    // --- Burbujas Ambientales ---
     for(let b of bubbles){
         b.y += b.vy - (velocity * 12);
         if(b.y < cy - radius) {
@@ -176,16 +187,33 @@ function loop(){
     }
     ctx.restore();
 
-    // 4. AGUJA Y GIRO
+    // 4. AGUJA (Ticker)
     drawTicker();
+
+    // 5. CONTROL DE GIRO (Frenada en ~3.5s)
     if(isSpinning){
         rotation += velocity;
-        velocity *= 0.993;
+        velocity *= 0.988; // Fricción ajustada para 3.5s
+        
         let sectorCurrent = Math.floor((rotation % (Math.PI*2)) / (Math.PI/4));
         let sectorLast = Math.floor(((rotation - velocity) % (Math.PI*2)) / (Math.PI/4));
         if(sectorCurrent != sectorLast) tickerAngle = -0.6;
         tickerAngle *= 0.8;
-        if(velocity < 0.0015) stopWheel();
+
+        if(velocity < 0.002) stopWheel();
+    }
+
+    // 6. DIBUJAR PARTÍCULAS DE VICTORIA (Explosión final)
+    for(let i = victoryParticles.length - 1; i >= 0; i--) {
+        let p = victoryParticles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+        if(p.life <= 0) { victoryParticles.splice(i, 1); continue; }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5 * p.life, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
     }
 }
 
@@ -205,32 +233,50 @@ function drawTicker(){
 function spin(){
     if(isSpinning) return;
     isSpinning = true;
+    victoryParticles = []; // Limpiar partículas anteriores
     document.getElementById("spinBtn").disabled = true;
     document.getElementById("result").textContent = "Mezclando...";
-    velocity = 0.4 + Math.random() * 0.3;
+    document.getElementById("result").style.transform = "scale(1)";
+    velocity = 0.5 + Math.random() * 0.2; // Impulso inicial
 }
 
 function stopWheel(){
     isSpinning = false;
     velocity = 0;
     document.getElementById("spinBtn").disabled = false;
+
     let finalAngle = (1.5 * Math.PI - rotation) % (Math.PI * 2);
     if(finalAngle < 0) finalAngle += Math.PI * 2;
     let idx = Math.floor(finalAngle / (Math.PI / 4));
     let res = sectors[idx];
+
+    // EFECTO: Explosión de burbujas al parar
+    for(let i=0; i<40; i++) {
+        victoryParticles.push({
+            x: cx, y: cy - radius + 20,
+            vx: (Math.random() - 0.5) * 12,
+            vy: (Math.random() - 0.5) * 12,
+            life: 1.0,
+            color: res === "CON" ? "#f1c40f" : "#3498db"
+        });
+    }
+
     const resDiv = document.getElementById("result");
+    resDiv.style.transform = "scale(1.4)";
     if(res === "CON"){
-        resDiv.textContent = "🍻 ¡CON ALCOHOL!";
+        resDiv.textContent = "🍻 ¡CON ALCOHOL! 🔴";
         resDiv.style.color = "#f1c40f";
         countAl++; document.getElementById("countAl").textContent = countAl;
     } else {
-        resDiv.textContent = "💧 ¡SIN ALCOHOL!";
+        resDiv.textContent = "💧 ¡SIN ALCOHOL! 🔵";
         resDiv.style.color = "#3498db";
         countNo++; document.getElementById("countNo").textContent = countNo;
     }
 }
 
 loop();
+
+// Inclinación móvil
 window.addEventListener("deviceorientation", e => {
     let gravityTilt = e.gamma / 40;
     if(!isSpinning) for(let w of wave) w.vy += gravityTilt;
