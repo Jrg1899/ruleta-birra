@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruleta Beer Pro 🍺</title>
+    <title>Ruleta Cerveza Virtual PRO 🍺</title>
     <style>
         body {
             font-family: 'Arial Black', sans-serif;
@@ -16,6 +16,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            overflow: hidden;
         }
 
         .wheel-container {
@@ -23,96 +24,140 @@
             width: 360px;
             height: 360px;
             margin: 20px;
-            border: 10px solid #333;
+            border: 12px solid #333;
             border-radius: 50%;
-            box-shadow: 0 0 50px rgba(241, 196, 15, 0.2);
-            overflow: visible;
+            box-shadow: 0 0 50px rgba(241, 196, 15, 0.3), inset 0 0 30px rgba(0,0,0,0.8);
+            background: #1a1a1a;
         }
 
-        /* Aguja */
+        /* Aguja mejorada */
         .arrow {
             position: absolute;
-            top: -30px;
+            top: -35px;
             left: 50%;
             transform: translateX(-50%);
             width: 0; height: 0; 
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-top: 50px solid #fff;
+            border-top: 55px solid #fff;
             z-index: 100;
             filter: drop-shadow(0 5px 5px black);
+            transform-origin: top center;
         }
+
+        /* Animación de vibración de la aguja al parar */
+        @keyframes arrow-vibrate {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            20% { transform: translateX(-50%) rotate(15deg); }
+            40% { transform: translateX(-50%) rotate(-10deg); }
+            60% { transform: translateX(-50%) rotate(5deg); }
+            80% { transform: translateX(-50%) rotate(-2deg); }
+            100% { transform: translateX(-50%) rotate(0deg); }
+        }
+        .vibrate { animation: arrow-vibrate 0.5s ease-out; }
 
         #wheel-svg {
             width: 100%;
             height: 100%;
             transform: rotate(0deg);
             transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1);
+            filter: url(#liquid-filter); /* Filtro base */
         }
 
-        /* Animación de burbujas */
+        /* Clase que activa el oleaje fuerte al girar */
+        .is-spinning #wheel-svg {
+            animation: liquid-wiggle 1s infinite linear;
+        }
+
+        @keyframes liquid-wiggle {
+            0%, 100% { filter: url(#liquid-filter-strong) brightness(1.1); }
+            50% { filter: url(#liquid-filter-strong) brightness(0.9); }
+        }
+
+        /* Animación de burbujas (más intensas al girar) */
         .bubble {
-            fill: rgba(255,255,255,0.4);
+            fill: rgba(255,255,255,0.5);
             animation: rise 2s infinite ease-in;
         }
-        @keyframes rise {
-            0% { transform: translateY(0); opacity: 0; }
-            50% { opacity: 0.6; }
-            100% { transform: translateY(-20px); opacity: 0; }
+        .is-spinning .bubble {
+            animation: rise 0.5s infinite linear; /* Super rápido al girar */
         }
 
-        /* Botón */
+        @keyframes rise {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 0.7; }
+            100% { transform: translateY(-40px); opacity: 0; }
+        }
+
         button {
-            padding: 15px 40px;
-            font-size: 1.5rem;
+            padding: 18px 45px;
+            font-size: 1.6rem;
+            font-weight: bold;
             background: linear-gradient(#f1c40f, #d35400);
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 5px #963d00;
-            margin-bottom: 20px;
+            box-shadow: 0 6px #963d00, 0 10px 20px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            transition: 0.1s;
         }
-        button:active { transform: translateY(4px); box-shadow: 0 1px #963d00; }
-
-        .stats {
-            background: rgba(255,255,255,0.1);
-            padding: 15px 30px;
-            border-radius: 20px;
-            font-size: 1.2rem;
-            border: 2px solid #f1c40f;
-        }
+        button:active { transform: translateY(4px); box-shadow: 0 2px #963d00; }
+        button:disabled { background: #555; box-shadow: none; cursor: not-allowed; }
 
         #result {
             font-size: 2rem;
             margin: 15px;
-            height: 40px;
+            min-height: 45px;
             color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241,196,15,0.5);
         }
 
-        .sector-text { fill: white; font-weight: bold; font-size: 14px; pointer-events: none; }
+        .stats {
+            background: rgba(255,255,255,0.05);
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            border: 2px solid rgba(241,196,15,0.3);
+            letter-spacing: 1px;
+        }
+
+        .sector-text { fill: white; font-weight: 900; font-size: 15px; pointer-events: none; text-shadow: 2px 2px 2px black; }
     </style>
 </head>
 <body>
 
-    <h1>🍺 RULETA VIRTUAL</h1>
+    <h1>🍺 RULETA BEER VIRTUAL</h1>
 
-    <div class="wheel-container">
-        <div class="arrow"></div>
+    <div class="wheel-container" id="main-container">
+        <div class="arrow" id="arrow"></div>
         <svg id="wheel-svg" viewBox="0 0 200 200">
             <defs>
+                <filter id="liquid-filter">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="turbulence" />
+                    <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="2" />
+                </filter>
+                
+                <filter id="liquid-filter-strong">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" result="turbulence" />
+                    <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="8" />
+                </filter>
+
                 <linearGradient id="grad-con" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="white"/> <stop offset="15%" stop-color="#f1c40f"/> <stop offset="100%" stop-color="#e67e22"/>
+                    <stop offset="0%" stop-color="#ffffff"/> <stop offset="12%" stop-color="#ffffff"/> <stop offset="18%" stop-color="#f1c40f"/> <stop offset="100%" stop-color="#d35400"/>
                 </linearGradient>
                 <linearGradient id="grad-sin" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="white"/> <stop offset="15%" stop-color="#3498db"/> <stop offset="100%" stop-color="#2980b9"/>
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="12%" stop-color="#ffffff"/>
+                    <stop offset="18%" stop-color="#3498db"/>
+                    <stop offset="100%" stop-color="#2980b9"/>
                 </linearGradient>
             </defs>
             <g id="sectors-group"></g>
         </svg>
     </div>
 
-    <button id="spinBtn" onclick="spin()">¡GIRAR BIRRA! 🍻</button>
+    <button id="spinBtn" onclick="spin()">¡GIRAR CAÑA! 🍻</button>
     
     <div id="result"></div>
 
@@ -140,25 +185,29 @@
             const y2 = 100 + 100 * Math.sin(Math.PI * (angle + anglePer - 90) / 180);
 
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", `M 100 100 L ${x1} ${y1} A 100 100 0 0 1 ${x2} ${y2} Z`);
             path.setAttribute("fill", s.type === "con" ? "url(#grad-con)" : "url(#grad-sin)");
-            path.setAttribute("stroke", "rgba(0,0,0,0.1)");
+            path.setAttribute("stroke", "rgba(0,0,0,0.15)");
 
-            // Añadir burbujas
-            for(let j=0; j<2; j++) {
+            // Añadir burbujas (más burbujas por sector)
+            for(let j=0; j<4; j++) {
                 const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                c.setAttribute("cx", 100 + (Math.random()*60 + 20) * Math.cos(Math.PI * (angle + 15 - 90) / 180));
-                c.setAttribute("cy", 100 + (Math.random()*60 + 20) * Math.sin(Math.PI * (angle + 15 - 90) / 180));
-                c.setAttribute("r", Math.random() * 2 + 1);
+                // Posicionamiento radial aleatorio dentro del sector
+                const rAngle = angle + 5 + Math.random()*(anglePer - 10);
+                const rRadius = 30 + Math.random()*65;
+                c.setAttribute("cx", 100 + rRadius * Math.cos(Math.PI * (rAngle - 90) / 180));
+                c.setAttribute("cy", 100 + rRadius * Math.sin(Math.PI * (rAngle - 90) / 180));
+                c.setAttribute("r", Math.random() * 1.5 + 1);
                 c.setAttribute("class", "bubble");
-                c.style.animationDelay = Math.random() * 2 + "s";
+                c.style.animationDelay = (Math.random() * 2) + "s";
                 g.appendChild(c);
             }
 
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("transform", `rotate(${angle + anglePer/2}, 100, 100)`);
-            text.setAttribute("x", "100"); text.setAttribute("y", "45");
+            text.setAttribute("x", "100"); text.setAttribute("y", "48");
             text.setAttribute("text-anchor", "middle");
             text.setAttribute("class", "sector-text");
             text.textContent = s.label;
@@ -170,31 +219,45 @@
 
         let rotation = 0;
         let cAl = 0; let cNo = 0;
+        let isSpinning = false;
 
         function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+
             const btn = document.getElementById("spinBtn");
+            const container = document.getElementById("main-container");
+            const arrow = document.getElementById("arrow");
+            
             btn.disabled = true;
-            const extra = Math.floor(Math.random() * 360) + 1800;
+            container.classList.add("is-spinning"); // Activa oleaje fuerte y burbujas rápidas
+            arrow.classList.remove("vibrate"); // Quita vibración anterior
+
+            const extra = Math.floor(Math.random() * 360) + 2160; // Min 6 vueltas
             rotation += extra;
             document.getElementById("wheel-svg").style.transform = `rotate(${rotation}deg)`;
 
             setTimeout(() => {
+                container.classList.remove("is-spinning"); // Desactiva efectos de movimiento
+                arrow.classList.add("vibrate"); // Efecto impacto aguja
+
                 const deg = rotation % 360;
                 const idx = sectors.length - 1 - Math.floor((deg % 360) / anglePer);
                 const res = sectors[idx < 0 ? 0 : idx].label;
 
                 const rDiv = document.getElementById("result");
                 if(res === "CON") {
-                    rDiv.textContent = "🍻 ¡CON ALCOHOL!";
+                    rDiv.textContent = "🍺 ¡CON ALCOHOL! 🔴";
                     rDiv.style.color = "#f1c40f";
                     cAl++; document.getElementById("countAl").textContent = cAl;
                 } else {
-                    rDiv.textContent = "💧 ¡SIN ALCOHOL!";
+                    rDiv.textContent = "💧 ¡SIN ALCOHOL! 🔵";
                     rDiv.style.color = "#3498db";
                     cNo++; document.getElementById("countNo").textContent = cNo;
                 }
+                isSpinning = false;
                 btn.disabled = false;
-            }, 4000);
+            }, 4000); // 4 segundos de giro
         }
     </script>
 </body>
